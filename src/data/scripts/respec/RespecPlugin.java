@@ -217,7 +217,7 @@ public class RespecPlugin implements SpawnPointPlugin
             System.out.println("\"ThinkTank (level " + x
                     + (x == MAX_LEVEL_SUPPORTED ? "+" : "") + ")\"," + RESPEC_ITEM_PREFIX
                     + x + ",0," + (long) (tmp.getXPForLevel(x) * RESPEC_ITEM_COST_PER_XP)
-                    + ",1,\"graphics/icons/cargo/relearner_white.png\",9999");
+                    + ",1,\"graphics/icons/cargo/thinktank_white.png\",9999");
         }
 
         // descriptions.csv
