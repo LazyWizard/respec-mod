@@ -1,3 +1,11 @@
+ 1.2 (February 7, 2013)
+========================
+(this version is not save compatible with earlier versions)
+This mod is now a utility mod, can be run alongside total conversions
+This mod will now auto-activate itself when you load an old save
+Reduced the cost of respeccing (1/5 the XP required for your current level)
+Renamed and added a description to the respec item
+
  1.1 (February 7, 2013)
 ========================
 The cost of respeccing no longer increases past level 60

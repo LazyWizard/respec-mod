@@ -11,6 +11,6 @@ public class AddRespec implements SectorGeneratorPlugin
     public void generate(SectorAPI sector)
     {
         StarSystemAPI system = (StarSystemAPI) Global.getSector().getStarSystems().get(0);
-        system.addSpawnPoint(new RespecPlugin());
+        system.addSpawnPoint(new RespecPlugin(system));
     }
 }

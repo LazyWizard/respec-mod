@@ -13,15 +13,16 @@ import com.fs.starfarer.api.characters.MutableCharacterStatsAPI;
 import java.awt.Color;
 import java.util.*;
 
-class RespecPlugin implements SpawnPointPlugin
+public class RespecPlugin implements SpawnPointPlugin
 {
     private static final String RESPEC_ITEM_PREFIX = "respec_";
     private static final float RESPEC_ITEM_COST_PER_XP = .2f;
     private static final int MAX_LEVEL_SUPPORTED = 60;
     private static final Set APTITUDE_IDS = new HashSet(), SKILL_IDS = new HashSet();
     private static final float DAYS_BETWEEN_CHECKS = .5f;
+    private static StarSystemAPI lastSystem = null;
+    private StarSystemAPI system;
     private long lastCheck = Long.MIN_VALUE;
-    private boolean firstSetup = true;
 
     static
     {
@@ -59,9 +60,21 @@ class RespecPlugin implements SpawnPointPlugin
         // Industry skills
     }
 
-    public RespecPlugin()
+    public RespecPlugin(StarSystemAPI system)
     {
+        RespecPlugin.lastSystem = this.system = system;
         lastCheck = Global.getSector().getClock().getTimestamp();
+    }
+
+    public Object readResolve()
+    {
+        RespecPlugin.lastSystem = this.system;
+        return this;
+    }
+
+    public static StarSystemAPI getLastSystem()
+    {
+        return lastSystem;
     }
 
     private int getLevel()
@@ -185,12 +198,6 @@ class RespecPlugin implements SpawnPointPlugin
     @Override
     public void advance(SectorAPI sector, LocationAPI location)
     {
-        if (firstSetup)
-        {
-            firstSetup = false;
-            checkStationInventories();
-        }
-
         if (sector.getClock().getElapsedDaysSince(lastCheck) >= DAYS_BETWEEN_CHECKS)
         {
             lastCheck = sector.getClock().getTimestamp();
