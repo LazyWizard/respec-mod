@@ -26,7 +26,7 @@ public class CheckAddRespec implements EveryFrameCombatPlugin
             }
 
             StarSystemAPI system = (StarSystemAPI) systems.get(0);
-            if (RespecPlugin.getLastSystem() != system)
+            if (system != RespecPlugin.getLastSystem())
             {
                 system.addSpawnPoint(new RespecPlugin(system));
             }
