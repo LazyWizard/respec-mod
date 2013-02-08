@@ -1,0 +1,8 @@
+ 1.1 (February 7, 2013)
+========================
+The cost of respeccing no longer increases past level 60
+New inventory icon (thanks to Gothars)
+
+ 1.0 (February 7, 2013)
+========================
+Initial version, no icon
