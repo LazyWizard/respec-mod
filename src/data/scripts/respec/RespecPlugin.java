@@ -1,7 +1,7 @@
 package data.scripts.respec;
 
 import com.fs.starfarer.api.Global;
-import com.fs.starfarer.api.campaign.CampaignFleetAPI;
+import com.fs.starfarer.api.campaign.CargoAPI;
 import com.fs.starfarer.api.campaign.CargoAPI.CargoItemType;
 import com.fs.starfarer.api.campaign.CargoStackAPI;
 import com.fs.starfarer.api.campaign.LocationAPI;
@@ -119,13 +119,13 @@ public class RespecPlugin implements SpawnPointPlugin
 
     private boolean checkPlayer()
     {
-        CampaignFleetAPI player = Global.getSector().getPlayerFleet();
+        CargoAPI cargo = Global.getSector().getPlayerFleet().getCargo();
         CargoStackAPI stack;
         String id;
         boolean shouldRespec = false;
 
         // Check for and remove all respec packages
-        for (Iterator iter = player.getCargo().getStacksCopy().iterator(); iter.hasNext();)
+        for (Iterator iter = cargo.getStacksCopy().iterator(); iter.hasNext();)
         {
             stack = (CargoStackAPI) iter.next();
             if (stack.isNull())
@@ -137,7 +137,7 @@ public class RespecPlugin implements SpawnPointPlugin
             if (id.startsWith(RESPEC_ITEM_PREFIX))
             {
                 shouldRespec = true;
-                stack.getCargo().removeItems(stack.getType(), stack.getData(), stack.getSize());
+                cargo.removeItems(stack.getType(), stack.getData(), stack.getSize());
             }
         }
 
@@ -180,7 +180,7 @@ public class RespecPlugin implements SpawnPointPlugin
                 id = (String) stack.getData();
                 if (id.startsWith(RESPEC_ITEM_PREFIX))
                 {
-                    stack.getCargo().removeItems(stack.getType(), stack.getData(), stack.getSize());
+                    station.getCargo().removeItems(stack.getType(), stack.getData(), stack.getSize());
                 }
             }
 
