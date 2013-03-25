@@ -1,3 +1,7 @@
+ 1.2b (February 12, 2013)
+==========================
+Fixed respec item not being removed from player fleet after a respec
+
  1.2 (February 7, 2013)
 ========================
 (this version is not save compatible with earlier versions)

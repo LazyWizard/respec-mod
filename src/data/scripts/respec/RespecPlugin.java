@@ -58,6 +58,13 @@ public class RespecPlugin implements SpawnPointPlugin
         SKILL_IDS.add("navigation");
 
         // Industry skills
+
+        // Mod-added skills
+        /*SKILL_IDS.add("vfleet_multi_fleet_command"); // Fleet Control
+         SKILL_IDS.add("vfleet_production_efficiency"); // Fleet Control
+         SKILL_IDS.add("vfleet_mining"); // Fleet Control
+         SKILL_IDS.add("vfleet_trade_efficiency"); // Fleet Control
+         SKILL_IDS.add("vfleet_trade_contracts"); // Fleet Control*/
     }
 
     public RespecPlugin(StarSystemAPI system)
@@ -153,7 +160,6 @@ public class RespecPlugin implements SpawnPointPlugin
 
     private void checkStationInventories()
     {
-        StarSystemAPI system = (StarSystemAPI) Global.getSector().getStarSystems().get(0);
         SectorEntityToken station;
         CargoStackAPI stack;
         String id, respecPackage = RESPEC_ITEM_PREFIX + getLevel();

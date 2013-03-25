@@ -2,8 +2,8 @@
     "id":"lw_respec",
     "name":"Respec Mod",
     "author":"LazyWizard",
-    "version":"1.2",
+    "version":"1.2b",
     "utility":"true",
-    "description":"Allows you to reshape your character. To use this mod, buy the 'ThinkTank' item, available at most stations.",
+    "description":"Allows you to adjust where you have spent your skill and aptitude points. To respec your character, buy the 'ThinkTank' item available at most stations.",
     "gameVersion":"0.54.1a",
 }
