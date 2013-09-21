@@ -1,0 +1,5 @@
+id,name,color,description,order,effect_skill_id
+combat,Combat,"220,94,41,255",Governs skills directly related to ship-to-ship combat.,1,aptitude_combat
+leadership,Leadership,"107,175,0,255",Governs skills concerned with leading ships and crews into battle.,2,aptitude_leadership
+technology,Technology,"0,121,216,255","Governs skills dealing with the use, modification, and recovery of existing technology.",3,aptitude_technology
+industry,Industry,"175,155,0,255","Governs skills related to outpost building, trade, resource extraction, refinement, and manufacturing.",4,aptitude_industry

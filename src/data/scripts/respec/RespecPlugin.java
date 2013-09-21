@@ -1,28 +1,20 @@
 package data.scripts.respec;
 
+import com.fs.starfarer.api.BaseModPlugin;
+import com.fs.starfarer.api.EveryFrameScript;
 import com.fs.starfarer.api.Global;
-import com.fs.starfarer.api.campaign.CargoAPI;
-import com.fs.starfarer.api.campaign.CargoAPI.CargoItemType;
-import com.fs.starfarer.api.campaign.CargoStackAPI;
-import com.fs.starfarer.api.campaign.LocationAPI;
-import com.fs.starfarer.api.campaign.SectorAPI;
-import com.fs.starfarer.api.campaign.SectorEntityToken;
-import com.fs.starfarer.api.campaign.SpawnPointPlugin;
-import com.fs.starfarer.api.campaign.StarSystemAPI;
 import com.fs.starfarer.api.characters.MutableCharacterStatsAPI;
 import java.awt.Color;
-import java.util.*;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
 
-public class RespecPlugin implements SpawnPointPlugin
+public class RespecPlugin extends BaseModPlugin implements EveryFrameScript
 {
     private static final String RESPEC_ITEM_PREFIX = "respec_";
     private static final float RESPEC_ITEM_COST_PER_XP = .2f;
     private static final int MAX_LEVEL_SUPPORTED = 60;
     private static final Set APTITUDE_IDS = new HashSet(), SKILL_IDS = new HashSet();
-    private static final float DAYS_BETWEEN_CHECKS = .5f;
-    private static StarSystemAPI lastSystem = null;
-    private StarSystemAPI system;
-    private long lastCheck = Long.MIN_VALUE;
 
     static
     {
@@ -42,7 +34,6 @@ public class RespecPlugin implements SpawnPointPlugin
         SKILL_IDS.add("flux_modulation");
 
         // Leadership skills
-        SKILL_IDS.add("coordinated_maneuvers");
         SKILL_IDS.add("advanced_tactics");
         SKILL_IDS.add("command_experience");
         SKILL_IDS.add("fleet_logistics");
@@ -56,45 +47,15 @@ public class RespecPlugin implements SpawnPointPlugin
         SKILL_IDS.add("mechanical_engineering");
         SKILL_IDS.add("field_repairs");
         SKILL_IDS.add("navigation");
-
-        // Industry skills
-
-        // Mod-added skills
-        /*SKILL_IDS.add("vfleet_multi_fleet_command"); // Fleet Control
-         SKILL_IDS.add("vfleet_production_efficiency"); // Fleet Control
-         SKILL_IDS.add("vfleet_mining"); // Fleet Control
-         SKILL_IDS.add("vfleet_trade_efficiency"); // Fleet Control
-         SKILL_IDS.add("vfleet_trade_contracts"); // Fleet Control*/
     }
 
-    public RespecPlugin(StarSystemAPI system)
+    private float getRespecCost(MutableCharacterStatsAPI character)
     {
-        RespecPlugin.lastSystem = this.system = system;
-        lastCheck = Global.getSector().getClock().getTimestamp();
-    }
-
-    public Object readResolve()
-    {
-        RespecPlugin.lastSystem = this.system;
-        return this;
-    }
-
-    public static StarSystemAPI getLastSystem()
-    {
-        return lastSystem;
-    }
-
-    private int getLevel()
-    {
-        MutableCharacterStatsAPI player = Global.getSector().getPlayerFleet().getCommanderStats();
-        float totalSkill = player.getSkillPoints() - 4; // Compensate for level 1 bonus
-
-        for (Iterator skills = SKILL_IDS.iterator(); skills.hasNext();)
-        {
-            totalSkill += player.getSkillLevel((String) skills.next());
-        }
-
-        return (int) Math.max(1f, Math.min(MAX_LEVEL_SUPPORTED, totalSkill / 2));
+        int level = (int) Math.max(1f,
+                Math.min(MAX_LEVEL_SUPPORTED, character.getLevel()));
+        data.scripts.plugins.LevelupPluginImpl tmp =
+                new data.scripts.plugins.LevelupPluginImpl();
+        return tmp.getXPForLevel(level);
     }
 
     private void respecPlayer()
@@ -124,91 +85,16 @@ public class RespecPlugin implements SpawnPointPlugin
         Global.getSector().addMessage("Respec complete.", Color.GREEN);
     }
 
-    private boolean checkPlayer()
+    @Override
+    public void onApplicationLoad() throws Exception
     {
-        CargoAPI cargo = Global.getSector().getPlayerFleet().getCargo();
-        CargoStackAPI stack;
-        String id;
-        boolean shouldRespec = false;
-
-        // Check for and remove all respec packages
-        for (Iterator iter = cargo.getStacksCopy().iterator(); iter.hasNext();)
-        {
-            stack = (CargoStackAPI) iter.next();
-            if (stack.isNull())
-            {
-                continue;
-            }
-
-            id = (String) stack.getData();
-            if (id.startsWith(RESPEC_ITEM_PREFIX))
-            {
-                shouldRespec = true;
-                cargo.removeItems(stack.getType(), stack.getData(), stack.getSize());
-            }
-        }
-
-        // A respec package was found
-        if (shouldRespec)
-        {
-            respecPlayer();
-            return true;
-        }
-
-        return false;
-    }
-
-    private void checkStationInventories()
-    {
-        SectorEntityToken station;
-        CargoStackAPI stack;
-        String id, respecPackage = RESPEC_ITEM_PREFIX + getLevel();
-
-        for (Iterator stations = system.getOrbitalStations().iterator(); stations.hasNext();)
-        {
-            station = (SectorEntityToken) stations.next();
-
-            // NO FREE RESPECS!
-            if (station.getCargo().isFreeTransfer())
-            {
-                continue;
-            }
-
-            // Remove all existing respec items
-            for (Iterator cargo = station.getCargo().getStacksCopy().iterator(); cargo.hasNext();)
-            {
-                stack = (CargoStackAPI) cargo.next();
-                if (stack.isNull())
-                {
-                    continue;
-                }
-
-                id = (String) stack.getData();
-                if (id.startsWith(RESPEC_ITEM_PREFIX))
-                {
-                    station.getCargo().removeItems(stack.getType(), stack.getData(), stack.getSize());
-                }
-            }
-
-            // Add the proper item for the player's level
-            station.getCargo().addItems(CargoItemType.RESOURCES, respecPackage, 1f);
-        }
-    }
-
-    private void doChecks()
-    {
-        checkPlayer();
-        checkStationInventories();
+        // TODO: Dynamically generate aptitude/skill list
     }
 
     @Override
-    public void advance(SectorAPI sector, LocationAPI location)
+    public void onGameLoad()
     {
-        if (sector.getClock().getElapsedDaysSince(lastCheck) >= DAYS_BETWEEN_CHECKS)
-        {
-            lastCheck = sector.getClock().getTimestamp();
-            doChecks();
-        }
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     public static void main(String[] args)
@@ -232,8 +118,26 @@ public class RespecPlugin implements SpawnPointPlugin
         {
             System.out.println(RESPEC_ITEM_PREFIX + x
                     + ",RESOURCE,\"The Neuroventure ThinkTank will rearrange"
-                    + " neuronal connections and thus allows to shift character"
+                    + " neural connections and allows for shifting character"
                     + " abilities from one specialization to another.\",,,");
         }
+    }
+
+    @Override
+    public boolean isDone()
+    {
+        return false;
+    }
+
+    @Override
+    public boolean runWhilePaused()
+    {
+        return true;
+    }
+
+    @Override
+    public void advance(float amount)
+    {
+        // TODO: write key handler
     }
 }
