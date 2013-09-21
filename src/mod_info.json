@@ -1,9 +1,0 @@
-{
-    "id":"lw_respec",
-    "name":"Respec Mod",
-    "author":"LazyWizard",
-    "version":"1.2b",
-    "utility":"true",
-    "description":"Allows you to adjust where you have spent your skill and aptitude points. To respec your character, buy the 'ThinkTank' item available at most stations.",
-    "gameVersion":"0.54.1a",
-}
