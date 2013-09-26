@@ -27,11 +27,6 @@ public class RespecPlugin extends BaseModPlugin implements EveryFrameScript
     private static final float DAYS_BETWEEN_CHECKS = .5f;
     private long lastCheck = Long.MIN_VALUE;
 
-    static
-    {
-        //Global.getLogger(RespecPlugin.class).setLevel(Level.INFO);
-    }
-
     private int getLevel()
     {
         MutableCharacterStatsAPI player = Global.getSector().getPlayerFleet().getCommanderStats();
@@ -129,9 +124,9 @@ public class RespecPlugin extends BaseModPlugin implements EveryFrameScript
                     id = (String) stack.getData();
                     if (id.startsWith(RESPEC_ITEM_PREFIX))
                     {
-                        Global.getLogger(RespecPlugin.class).log(Level.DEBUG,
-                                "Removing " + stack.getSize() + " items from "
-                                + station.getFullName() + ".");
+                        /*Global.getLogger(RespecPlugin.class).log(Level.DEBUG,
+                         "Removing " + stack.getSize() + " items from "
+                         + station.getFullName() + ".");*/
                         station.getCargo().removeItems(stack.getType(),
                                 stack.getData(), stack.getSize());
                     }
@@ -140,8 +135,8 @@ public class RespecPlugin extends BaseModPlugin implements EveryFrameScript
                 // Add the proper item for the player's level (no free respecs)
                 if (addRespec && !station.getCargo().isFreeTransfer())
                 {
-                    Global.getLogger(RespecPlugin.class).log(Level.DEBUG,
-                            "Adding item to " + station.getFullName() + ".");
+                    /*Global.getLogger(RespecPlugin.class).log(Level.DEBUG,
+                     "Adding item to " + station.getFullName() + ".");*/
                     station.getCargo().addItems(CargoItemType.RESOURCES, respecPackage, 1f);
                 }
             }
@@ -180,6 +175,8 @@ public class RespecPlugin extends BaseModPlugin implements EveryFrameScript
     @Override
     public void onApplicationLoad() throws Exception
     {
+        //Global.getLogger(RespecPlugin.class).setLevel(Level.INFO);
+
         // Aptitudes
         APTITUDE_IDS.add("combat");
         APTITUDE_IDS.add("leadership");
@@ -269,21 +266,22 @@ public class RespecPlugin extends BaseModPlugin implements EveryFrameScript
         {
             progress = x / (float) MAX_LEVEL_SUPPORTED;
 
+            // Inventory icon changes for higher-level respecs
             if (x == MAX_LEVEL_SUPPORTED)
             {
                 icon = "graphics/icons/cargo/thinktank_black.png";
             }
-            else if (progress < .33f)
+            else if (progress >= .66f)
             {
-                icon = "graphics/icons/cargo/thinktank_white.png";
+                icon = "graphics/icons/cargo/thinktank_beige.png";
             }
-            else if (progress < .66f)
+            else if (progress >= .33f)
             {
                 icon = "graphics/icons/cargo/thinktank_silver.png";
             }
             else
             {
-                icon = "graphics/icons/cargo/thinktank_beige.png";
+                icon = "graphics/icons/cargo/thinktank_white.png";
             }
 
             System.out.println("\"ThinkTank (level " + x
