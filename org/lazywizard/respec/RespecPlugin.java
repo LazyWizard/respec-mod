@@ -15,7 +15,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import org.apache.log4j.Level;
-import org.json.JSONArray;
 
 public class RespecPlugin extends BaseModPlugin implements EveryFrameScript
 {
@@ -23,8 +22,8 @@ public class RespecPlugin extends BaseModPlugin implements EveryFrameScript
     private static final String RESPEC_ITEM_PREFIX = "respec_";
     private static final float RESPEC_ITEM_COST_PER_XP = .2f;
     private static final int MAX_LEVEL_SUPPORTED = 60;
-    private static final Set<String> APTITUDE_IDS = new HashSet<String>();
-    private static final Set<String> SKILL_IDS = new HashSet<String>();
+    private static final Set<String> APTITUDE_IDS = new HashSet<String>(4);
+    private static final Set<String> SKILL_IDS = new HashSet<String>(32);
     private static final float DAYS_BETWEEN_CHECKS = .5f;
     private long lastCheck = Long.MIN_VALUE;
 
@@ -212,37 +211,37 @@ public class RespecPlugin extends BaseModPlugin implements EveryFrameScript
         SKILL_IDS.add("navigation");
 
         /*String id;
-        Global.getLogger(RespecPlugin.class).log(Level.DEBUG,
-                "Loading aptitudes...");
-        JSONArray aptitudeData = Global.getSettings()
-                .getMergedSpreadhsheetDataForMod("id",
-                "data/characters/skills/aptitude_data.csv", "lw_respec");
-        for (int x = 0; x < aptitudeData.length(); x++)
-        {
-            id = aptitudeData.getJSONObject(x).getString("id");
-            Global.getLogger(RespecPlugin.class).log(Level.DEBUG,
-                    "Found aptitude \"" + id + "\"");
-            APTITUDE_IDS.add(id);
-        }
+         Global.getLogger(RespecPlugin.class).log(Level.DEBUG,
+         "Loading aptitudes...");
+         JSONArray aptitudeData = Global.getSettings()
+         .getMergedSpreadhsheetDataForMod("id",
+         "data/characters/skills/aptitude_data.csv", "lw_respec");
+         for (int x = 0; x < aptitudeData.length(); x++)
+         {
+         id = aptitudeData.getJSONObject(x).getString("id");
+         Global.getLogger(RespecPlugin.class).log(Level.DEBUG,
+         "Found aptitude \"" + id + "\"");
+         APTITUDE_IDS.add(id);
+         }
 
-        Global.getLogger(RespecPlugin.class).log(Level.DEBUG,
-                "Aptitudes loaded.");
-        Global.getLogger(RespecPlugin.class).log(Level.DEBUG,
-                "Loading skills...");
+         Global.getLogger(RespecPlugin.class).log(Level.DEBUG,
+         "Aptitudes loaded.");
+         Global.getLogger(RespecPlugin.class).log(Level.DEBUG,
+         "Loading skills...");
 
-        JSONArray skillData = Global.getSettings()
-                .getMergedSpreadhsheetDataForMod("id",
-                "data/characters/skills/skill_data.csv", "lw_respec");
-        for (int x = 0; x < skillData.length(); x++)
-        {
-            id = skillData.getJSONObject(x).getString("id");
-            Global.getLogger(RespecPlugin.class).log(Level.DEBUG,
-                    "Found skill \"" + id + "\"");
-            SKILL_IDS.add(id);
-        }
+         JSONArray skillData = Global.getSettings()
+         .getMergedSpreadhsheetDataForMod("id",
+         "data/characters/skills/skill_data.csv", "lw_respec");
+         for (int x = 0; x < skillData.length(); x++)
+         {
+         id = skillData.getJSONObject(x).getString("id");
+         Global.getLogger(RespecPlugin.class).log(Level.DEBUG,
+         "Found skill \"" + id + "\"");
+         SKILL_IDS.add(id);
+         }
 
-        Global.getLogger(RespecPlugin.class).log(Level.DEBUG,
-                "Loaded skills.");*/
+         Global.getLogger(RespecPlugin.class).log(Level.DEBUG,
+         "Loaded skills.");*/
     }
 
     @Override
@@ -261,15 +260,36 @@ public class RespecPlugin extends BaseModPlugin implements EveryFrameScript
     {
         data.scripts.plugins.LevelupPluginImpl tmp =
                 new data.scripts.plugins.LevelupPluginImpl();
+        String icon;
+        float progress;
 
         // resources.csv
         System.out.println("name,id,cargo space,base value,stack size,icon,order");
         for (int x = 1; x <= MAX_LEVEL_SUPPORTED; x++)
         {
+            progress = x / (float) MAX_LEVEL_SUPPORTED;
+
+            if (x == MAX_LEVEL_SUPPORTED)
+            {
+                icon = "graphics/icons/cargo/thinktank_black.png";
+            }
+            else if (progress < .33f)
+            {
+                icon = "graphics/icons/cargo/thinktank_white.png";
+            }
+            else if (progress < .66f)
+            {
+                icon = "graphics/icons/cargo/thinktank_silver.png";
+            }
+            else
+            {
+                icon = "graphics/icons/cargo/thinktank_beige.png";
+            }
+
             System.out.println("\"ThinkTank (level " + x
                     + (x == MAX_LEVEL_SUPPORTED ? "+" : "") + ")\"," + RESPEC_ITEM_PREFIX
                     + x + ",0," + (long) (tmp.getXPForLevel(x) * RESPEC_ITEM_COST_PER_XP)
-                    + ",1,\"graphics/icons/cargo/thinktank_white.png\",9999");
+                    + ",1,\"" + icon + "\",9999");
         }
 
         // descriptions.csv
