@@ -22,7 +22,7 @@ public class RespecPlugin extends BaseModPlugin implements EveryFrameScript
     private static final String RESPEC_ITEM_PREFIX = "respec_";
     private static final float RESPEC_ITEM_COST_PER_XP = .2f;
     private static final int MAX_LEVEL_SUPPORTED = 60;
-    private static final Set<String> APTITUDE_IDS = new HashSet<String>(4);
+    private static final Set<String> APTITUDE_IDS = new HashSet<String>(8);
     private static final Set<String> SKILL_IDS = new HashSet<String>(32);
     private static final float DAYS_BETWEEN_CHECKS = .5f;
     private long lastCheck = Long.MIN_VALUE;
@@ -108,6 +108,7 @@ public class RespecPlugin extends BaseModPlugin implements EveryFrameScript
     {
         Global.getLogger(RespecPlugin.class).log(Level.DEBUG,
                 "Checking station inventories...");
+
         String id, respecPackage = RESPEC_ITEM_PREFIX + getLevel();
         for (StarSystemAPI system : Global.getSector().getStarSystems())
         {
@@ -141,6 +142,9 @@ public class RespecPlugin extends BaseModPlugin implements EveryFrameScript
                 }
             }
         }
+
+        Global.getLogger(RespecPlugin.class).log(Level.DEBUG,
+                "Checked station inventories.");
     }
 
     private void doChecks()
@@ -260,7 +264,7 @@ public class RespecPlugin extends BaseModPlugin implements EveryFrameScript
         String icon;
         float progress;
 
-        // resources.csv
+        // data/campaign/resources.csv
         System.out.println("name,id,cargo space,base value,stack size,icon,order");
         for (int x = 1; x <= MAX_LEVEL_SUPPORTED; x++)
         {
@@ -290,7 +294,7 @@ public class RespecPlugin extends BaseModPlugin implements EveryFrameScript
                     + ",1,\"" + icon + "\",9999");
         }
 
-        // descriptions.csv
+        // data/strings/descriptions.csv
         System.out.println("\n\n\nid,type,text1,text2,text3,notes");
         for (int x = 1; x <= MAX_LEVEL_SUPPORTED; x++)
         {
