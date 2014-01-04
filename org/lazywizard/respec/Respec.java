@@ -14,6 +14,7 @@ import org.apache.log4j.Level;
 import org.json.JSONArray;
 import org.json.JSONException;
 
+// TODO: don't constantly remove/add single respec to every cargo each hour
 public class Respec
 {
     private static final String RESPEC_ITEM_PREFIX = "respec_";
@@ -24,68 +25,56 @@ public class Respec
 
     static void reloadData() throws JSONException, IOException
     {
-        /*// Aptitudes
-         APTITUDE_IDS.add("combat");
-         APTITUDE_IDS.add("leadership");
-         APTITUDE_IDS.add("technology");
-         APTITUDE_IDS.add("industry");
-
-         // Combat skills
-         SKILL_IDS.add("missile_specialization");
-         SKILL_IDS.add("ordnance_expert");
-         SKILL_IDS.add("damage_control");
-         SKILL_IDS.add("target_analysis");
-         SKILL_IDS.add("evasive_action");
-         SKILL_IDS.add("helmsmanship");
-         SKILL_IDS.add("flux_modulation");
-
-         // Leadership skills
-         SKILL_IDS.add("advanced_tactics");
-         SKILL_IDS.add("command_experience");
-         SKILL_IDS.add("fleet_logistics");
-
-         // Technology skills
-         SKILL_IDS.add("gunnery_implants");
-         SKILL_IDS.add("applied_physics");
-         SKILL_IDS.add("flux_dynamics");
-         SKILL_IDS.add("computer_systems");
-         SKILL_IDS.add("construction");
-         SKILL_IDS.add("mechanical_engineering");
-         SKILL_IDS.add("field_repairs");
-         SKILL_IDS.add("navigation");*/
-
         String id;
-        Global.getLogger(RespecScript.class).log(Level.INFO,
+        int total;
+
+        Global.getLogger(Respec.class).log(Level.INFO,
                 "Loading aptitudes...");
         JSONArray aptitudeData = Global.getSettings()
                 .loadCSV("data/characters/skills/aptitude_data.csv");
-        //.getMergedSpreadsheetDataForMod("id",
-        //"data/characters/skills/aptitude_data.csv", "lw_respec");
+        total = 0;
         for (int x = 0; x < aptitudeData.length(); x++)
         {
             id = aptitudeData.getJSONObject(x).getString("id");
-            Global.getLogger(RespecScript.class).log(Level.DEBUG,
-                    "Found aptitude \"" + id + "\"");
-            APTITUDE_IDS.add(id);
+            if (id.isEmpty())
+            {
+                Global.getLogger(Respec.class).log(Level.DEBUG,
+                        "Ignoring empty aptitude");
+            }
+            else
+            {
+                Global.getLogger(Respec.class).log(Level.DEBUG,
+                        "Found aptitude \"" + id + "\"");
+                APTITUDE_IDS.add(id);
+                total++;
+            }
         }
-        Global.getLogger(RespecScript.class).log(Level.INFO,
-                "Loaded " + aptitudeData.length() + " aptitudes.");
+        Global.getLogger(Respec.class).log(Level.INFO,
+                "Loaded " + total + " aptitudes.");
 
-        Global.getLogger(RespecScript.class).log(Level.INFO,
+        Global.getLogger(Respec.class).log(Level.INFO,
                 "Loading skills...");
         JSONArray skillData = Global.getSettings()
                 .loadCSV("data/characters/skills/skill_data.csv");
-        //.getMergedSpreadsheetDataForMod("id",
-        //"data/characters/skills/skill_data.csv", "lw_respec");
+        total = 0;
         for (int x = 0; x < skillData.length(); x++)
         {
             id = skillData.getJSONObject(x).getString("id");
-            Global.getLogger(RespecScript.class).log(Level.DEBUG,
-                    "Found skill \"" + id + "\"");
-            SKILL_IDS.add(id);
+            if (id.isEmpty())
+            {
+                Global.getLogger(Respec.class).log(Level.DEBUG,
+                        "Ignoring empty skill");
+            }
+            else
+            {
+                Global.getLogger(Respec.class).log(Level.DEBUG,
+                        "Found skill \"" + id + "\"");
+                SKILL_IDS.add(id);
+                total++;
+            }
         }
-        Global.getLogger(RespecScript.class).log(Level.INFO,
-                "Loaded " + skillData.length() + " skills.");
+        Global.getLogger(Respec.class).log(Level.INFO,
+                "Loaded " + total + " skills.");
     }
 
     private static int getLevel()
@@ -99,7 +88,7 @@ public class Respec
         int tmp;
         MutableCharacterStatsAPI player = Global.getSector().getPlayerFleet().getCommanderStats();
 
-        Global.getLogger(RespecScript.class).log(Level.INFO,
+        Global.getLogger(Respec.class).log(Level.INFO,
                 "Performing respec...");
 
         // Remove aptitudes
@@ -108,7 +97,7 @@ public class Respec
             tmp = Math.round(player.getAptitudeLevel(currId));
             if (tmp > 0)
             {
-                Global.getLogger(RespecScript.class).log(Level.DEBUG,
+                Global.getLogger(Respec.class).log(Level.DEBUG,
                         "Removing " + tmp + " aptitude points from " + currId);
                 player.setAptitudeLevel(currId, 0f);
                 player.addAptitudePoints(tmp);
@@ -121,14 +110,14 @@ public class Respec
             tmp = Math.round(player.getSkillLevel(currId));
             if (tmp > 0)
             {
-                Global.getLogger(RespecScript.class).log(Level.DEBUG,
+                Global.getLogger(Respec.class).log(Level.DEBUG,
                         "Removing " + tmp + " skill points from " + currId);
                 player.setSkillLevel(currId, 0f);
                 player.addSkillPoints(tmp);
             }
         }
 
-        Global.getLogger(RespecScript.class).log(Level.INFO,
+        Global.getLogger(Respec.class).log(Level.INFO,
                 "Respec complete.");
         Global.getSector().getCampaignUI().addMessage("Respec complete.", Color.GREEN);
     }
@@ -167,7 +156,7 @@ public class Respec
 
     static void updateInventories(boolean addRespec)
     {
-        Global.getLogger(RespecScript.class).log(Level.DEBUG,
+        Global.getLogger(Respec.class).log(Level.DEBUG,
                 "Checking station inventories...");
 
         String id, respecPackage = RESPEC_ITEM_PREFIX + getLevel();
@@ -186,7 +175,7 @@ public class Respec
                     id = (String) stack.getData();
                     if (id.startsWith(RESPEC_ITEM_PREFIX))
                     {
-                        Global.getLogger(RespecScript.class).log(Level.DEBUG,
+                        Global.getLogger(Respec.class).log(Level.DEBUG,
                                 "Removing " + stack.getSize() + " items from "
                                 + station.getFullName() + ".");
                         station.getCargo().removeItems(stack.getType(),
@@ -198,14 +187,14 @@ public class Respec
                 if (addRespec && !station.getCargo().isFreeTransfer()
                         && !station.getFaction().isNeutralFaction())
                 {
-                    Global.getLogger(RespecScript.class).log(Level.DEBUG,
+                    Global.getLogger(Respec.class).log(Level.DEBUG,
                             "Adding item to " + station.getFullName() + ".");
                     station.getCargo().addItems(CargoAPI.CargoItemType.RESOURCES, respecPackage, 1f);
                 }
             }
         }
 
-        Global.getLogger(RespecScript.class).log(Level.DEBUG,
+        Global.getLogger(Respec.class).log(Level.DEBUG,
                 "Checked station inventories.");
     }
 
