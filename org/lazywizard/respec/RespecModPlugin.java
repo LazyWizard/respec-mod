@@ -9,8 +9,8 @@ public class RespecModPlugin extends BaseModPlugin
     @Override
     public void onApplicationLoad() throws Exception
     {
-        //Global.getLogger(RespecScript.class).setLevel(Level.INFO);
-        RespecScript.reloadData();
+        Global.getLogger(Respec.class).setLevel(Level.INFO);
+        Respec.reloadData();
     }
 
     @Override
@@ -31,6 +31,7 @@ public class RespecModPlugin extends BaseModPlugin
     @Override
     public void beforeGameSave()
     {
+        Respec.updateInventories(false);
         Global.getSector().removeScriptsOfClass(RespecScript.class);
     }
 
