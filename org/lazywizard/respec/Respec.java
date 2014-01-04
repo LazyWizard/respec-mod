@@ -142,7 +142,7 @@ public class Respec
         // Check for and remove all respec packages
         for (CargoStackAPI stack : cargo.getStacksCopy())
         {
-            if (stack.isNull())
+            if (stack.isNull() || !stack.isResourceStack())
             {
                 continue;
             }
@@ -178,7 +178,7 @@ public class Respec
                 // Remove all existing respec items
                 for (CargoStackAPI stack : station.getCargo().getStacksCopy())
                 {
-                    if (stack.isNull())
+                    if (stack.isNull() || !stack.isResourceStack())
                     {
                         continue;
                     }

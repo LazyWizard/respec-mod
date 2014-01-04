@@ -22,6 +22,7 @@ public class RespecModPlugin extends BaseModPlugin
     @Override
     public void beforeGameSave()
     {
+        Respec.checkPlayer();
         Respec.updateInventories(false);
         Global.getSector().removeScriptsOfClass(RespecScript.class);
     }
