@@ -24,7 +24,7 @@ public class RespecScript implements EveryFrameScript
     private static final int MAX_LEVEL_SUPPORTED = 60;
     private static final Set<String> APTITUDE_IDS = new HashSet<String>();
     private static final Set<String> SKILL_IDS = new HashSet<String>();
-    private int lastCheck = 15;
+    private int lastCheck = 25;
 
     static void reloadData() throws JSONException, IOException
     {
