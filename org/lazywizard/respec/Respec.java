@@ -14,8 +14,7 @@ import org.apache.log4j.Level;
 import org.json.JSONArray;
 import org.json.JSONException;
 
-// TODO: don't constantly remove/add single respec to every cargo each hour
-public class Respec
+class Respec
 {
     private static final String RESPEC_ITEM_PREFIX = "respec_";
     private static final float RESPEC_ITEM_COST_PER_XP = .2f;
@@ -39,7 +38,7 @@ public class Respec
             if (id.isEmpty())
             {
                 Global.getLogger(Respec.class).log(Level.DEBUG,
-                        "Ignoring empty aptitude");
+                        "Ignoring empty CSV row");
             }
             else
             {
@@ -63,7 +62,7 @@ public class Respec
             if (id.isEmpty())
             {
                 Global.getLogger(Respec.class).log(Level.DEBUG,
-                        "Ignoring empty skill");
+                        "Ignoring empty CSV row");
             }
             else
             {
@@ -244,5 +243,9 @@ public class Respec
                     + " neural connections and allows for shifting character"
                     + " abilities from one specialization to another.\",,,");
         }
+    }
+
+    private Respec()
+    {
     }
 }
