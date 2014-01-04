@@ -23,7 +23,7 @@ public class Respec
     private static final Set<String> APTITUDE_IDS = new HashSet<String>();
     private static final Set<String> SKILL_IDS = new HashSet<String>();
 
-    static void reloadData() throws JSONException, IOException
+    static void loadCSVData() throws JSONException, IOException
     {
         String id;
         int total;

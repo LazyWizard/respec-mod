@@ -10,7 +10,7 @@ public class RespecModPlugin extends BaseModPlugin
     public void onApplicationLoad() throws Exception
     {
         Global.getLogger(Respec.class).setLevel(Level.INFO);
-        Respec.reloadData();
+        Respec.loadCSVData();
     }
 
     @Override
