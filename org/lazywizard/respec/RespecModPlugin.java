@@ -14,15 +14,6 @@ public class RespecModPlugin extends BaseModPlugin
     }
 
     @Override
-    public void onEnabled(boolean wasEnabledBefore)
-    {
-        if (!wasEnabledBefore)
-        {
-            Global.getSector().addScript(new RespecScript());
-        }
-    }
-
-    @Override
     public void onGameLoad()
     {
         Global.getSector().addScript(new RespecScript());
