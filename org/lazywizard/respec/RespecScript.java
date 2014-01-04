@@ -1,6 +1,5 @@
 package org.lazywizard.respec;
 
-import com.fs.starfarer.api.BaseModPlugin;
 import com.fs.starfarer.api.EveryFrameScript;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignClockAPI;
@@ -11,21 +10,92 @@ import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.campaign.StarSystemAPI;
 import com.fs.starfarer.api.characters.MutableCharacterStatsAPI;
 import java.awt.Color;
+import java.io.IOException;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 import org.apache.log4j.Level;
+import org.json.JSONArray;
+import org.json.JSONException;
 
-public class RespecPlugin extends BaseModPlugin implements EveryFrameScript
+public class RespecScript implements EveryFrameScript
 {
-    private static final String RESPEC_ENABLED_FLAG = "lw_respec_enabled";
     private static final String RESPEC_ITEM_PREFIX = "respec_";
     private static final float RESPEC_ITEM_COST_PER_XP = .2f;
     private static final int MAX_LEVEL_SUPPORTED = 60;
-    private static final Set<String> APTITUDE_IDS = new HashSet<String>(8);
-    private static final Set<String> SKILL_IDS = new HashSet<String>(32);
-    private static final float DAYS_BETWEEN_CHECKS = .5f;
-    private long lastCheck = Long.MIN_VALUE;
+    private static final Set<String> APTITUDE_IDS = new HashSet<String>();
+    private static final Set<String> SKILL_IDS = new HashSet<String>();
+    private int lastCheck = 15;
+
+    static void reloadData() throws JSONException, IOException
+    {
+        /*// Aptitudes
+         APTITUDE_IDS.add("combat");
+         APTITUDE_IDS.add("leadership");
+         APTITUDE_IDS.add("technology");
+         APTITUDE_IDS.add("industry");
+
+         // Combat skills
+         SKILL_IDS.add("missile_specialization");
+         SKILL_IDS.add("ordnance_expert");
+         SKILL_IDS.add("damage_control");
+         SKILL_IDS.add("target_analysis");
+         SKILL_IDS.add("evasive_action");
+         SKILL_IDS.add("helmsmanship");
+         SKILL_IDS.add("flux_modulation");
+
+         // Leadership skills
+         SKILL_IDS.add("advanced_tactics");
+         SKILL_IDS.add("command_experience");
+         SKILL_IDS.add("fleet_logistics");
+
+         // Technology skills
+         SKILL_IDS.add("gunnery_implants");
+         SKILL_IDS.add("applied_physics");
+         SKILL_IDS.add("flux_dynamics");
+         SKILL_IDS.add("computer_systems");
+         SKILL_IDS.add("construction");
+         SKILL_IDS.add("mechanical_engineering");
+         SKILL_IDS.add("field_repairs");
+         SKILL_IDS.add("navigation");*/
+
+        String id;
+        Global.getLogger(RespecScript.class).log(Level.INFO,
+                "Loading aptitudes...");
+        JSONArray aptitudeData = Global.getSettings()
+                .loadCSV("data/characters/skills/aptitude_data.csv");
+        //.getMergedSpreadsheetDataForMod("id",
+        //"data/characters/skills/aptitude_data.csv", "lw_respec");
+        for (int x = 0; x < aptitudeData.length(); x++)
+        {
+            id = aptitudeData.getJSONObject(x).getString("id");
+            Global.getLogger(RespecScript.class).log(Level.DEBUG,
+                    "Found aptitude \"" + id + "\"");
+            APTITUDE_IDS.add(id);
+        }
+        Global.getLogger(RespecScript.class).log(Level.INFO,
+                "Loaded " + aptitudeData.length() + " aptitudes.");
+
+        Global.getLogger(RespecScript.class).log(Level.INFO,
+                "Loading skills...");
+        JSONArray skillData = Global.getSettings()
+                .loadCSV("data/characters/skills/skill_data.csv");
+        //.getMergedSpreadsheetDataForMod("id",
+        //"data/characters/skills/skill_data.csv", "lw_respec");
+        for (int x = 0; x < skillData.length(); x++)
+        {
+            id = skillData.getJSONObject(x).getString("id");
+            Global.getLogger(RespecScript.class).log(Level.DEBUG,
+                    "Found skill \"" + id + "\"");
+            SKILL_IDS.add(id);
+        }
+        Global.getLogger(RespecScript.class).log(Level.INFO,
+                "Loaded " + skillData.length() + " skills.");
+    }
+
+    public RespecScript()
+    {
+        updateInventories(true);
+    }
 
     private int getLevel()
     {
@@ -38,7 +108,7 @@ public class RespecPlugin extends BaseModPlugin implements EveryFrameScript
         int tmp;
         MutableCharacterStatsAPI player = Global.getSector().getPlayerFleet().getCommanderStats();
 
-        Global.getLogger(RespecPlugin.class).log(Level.INFO,
+        Global.getLogger(RespecScript.class).log(Level.INFO,
                 "Performing respec...");
 
         // Remove aptitudes
@@ -47,7 +117,7 @@ public class RespecPlugin extends BaseModPlugin implements EveryFrameScript
             tmp = Math.round(player.getAptitudeLevel(currId));
             if (tmp > 0)
             {
-                Global.getLogger(RespecPlugin.class).log(Level.DEBUG,
+                Global.getLogger(RespecScript.class).log(Level.DEBUG,
                         "Removing " + tmp + " aptitude points from " + currId);
                 player.setAptitudeLevel(currId, 0f);
                 player.addAptitudePoints(tmp);
@@ -60,14 +130,14 @@ public class RespecPlugin extends BaseModPlugin implements EveryFrameScript
             tmp = Math.round(player.getSkillLevel(currId));
             if (tmp > 0)
             {
-                Global.getLogger(RespecPlugin.class).log(Level.DEBUG,
+                Global.getLogger(RespecScript.class).log(Level.DEBUG,
                         "Removing " + tmp + " skill points from " + currId);
                 player.setSkillLevel(currId, 0f);
                 player.addSkillPoints(tmp);
             }
         }
 
-        Global.getLogger(RespecPlugin.class).log(Level.INFO,
+        Global.getLogger(RespecScript.class).log(Level.INFO,
                 "Respec complete.");
         Global.getSector().getCampaignUI().addMessage("Respec complete.", Color.GREEN);
     }
@@ -106,7 +176,7 @@ public class RespecPlugin extends BaseModPlugin implements EveryFrameScript
 
     private void updateInventories(boolean addRespec)
     {
-        Global.getLogger(RespecPlugin.class).log(Level.DEBUG,
+        Global.getLogger(RespecScript.class).log(Level.DEBUG,
                 "Checking station inventories...");
 
         String id, respecPackage = RESPEC_ITEM_PREFIX + getLevel();
@@ -125,25 +195,26 @@ public class RespecPlugin extends BaseModPlugin implements EveryFrameScript
                     id = (String) stack.getData();
                     if (id.startsWith(RESPEC_ITEM_PREFIX))
                     {
-                        /*Global.getLogger(RespecPlugin.class).log(Level.DEBUG,
-                         "Removing " + stack.getSize() + " items from "
-                         + station.getFullName() + ".");*/
+                        Global.getLogger(RespecScript.class).log(Level.DEBUG,
+                                "Removing " + stack.getSize() + " items from "
+                                + station.getFullName() + ".");
                         station.getCargo().removeItems(stack.getType(),
                                 stack.getData(), stack.getSize());
                     }
                 }
 
                 // Add the proper item for the player's level (no free respecs)
-                if (addRespec && !station.getCargo().isFreeTransfer())
+                if (addRespec && !station.getCargo().isFreeTransfer()
+                        && !station.getFaction().isNeutralFaction())
                 {
-                    /*Global.getLogger(RespecPlugin.class).log(Level.DEBUG,
-                     "Adding item to " + station.getFullName() + ".");*/
+                    Global.getLogger(RespecScript.class).log(Level.DEBUG,
+                            "Adding item to " + station.getFullName() + ".");
                     station.getCargo().addItems(CargoItemType.RESOURCES, respecPackage, 1f);
                 }
             }
         }
 
-        Global.getLogger(RespecPlugin.class).log(Level.DEBUG,
+        Global.getLogger(RespecScript.class).log(Level.DEBUG,
                 "Checked station inventories.");
     }
 
@@ -151,14 +222,14 @@ public class RespecPlugin extends BaseModPlugin implements EveryFrameScript
     {
         checkPlayer();
         updateInventories(true);
-        lastCheck = Global.getSector().getClock().getTimestamp();
+        lastCheck = Global.getSector().getClock().getHour();
     }
 
     @Override
     public void advance(float amount)
     {
         CampaignClockAPI clock = Global.getSector().getClock();
-        if (clock.getElapsedDaysSince(lastCheck) >= DAYS_BETWEEN_CHECKS)
+        if (clock.getHour() != lastCheck)
         {
             doChecks();
         }
@@ -176,91 +247,10 @@ public class RespecPlugin extends BaseModPlugin implements EveryFrameScript
         return false;
     }
 
-    @Override
-    public void onApplicationLoad() throws Exception
-    {
-        //Global.getLogger(RespecPlugin.class).setLevel(Level.INFO);
-
-        // Aptitudes
-        APTITUDE_IDS.add("combat");
-        APTITUDE_IDS.add("leadership");
-        APTITUDE_IDS.add("technology");
-        APTITUDE_IDS.add("industry");
-
-        // Combat skills
-        SKILL_IDS.add("missile_specialization");
-        SKILL_IDS.add("ordnance_expert");
-        SKILL_IDS.add("damage_control");
-        SKILL_IDS.add("target_analysis");
-        SKILL_IDS.add("evasive_action");
-        SKILL_IDS.add("helmsmanship");
-        SKILL_IDS.add("flux_modulation");
-
-        // Leadership skills
-        SKILL_IDS.add("advanced_tactics");
-        SKILL_IDS.add("command_experience");
-        SKILL_IDS.add("fleet_logistics");
-
-        // Technology skills
-        SKILL_IDS.add("gunnery_implants");
-        SKILL_IDS.add("applied_physics");
-        SKILL_IDS.add("flux_dynamics");
-        SKILL_IDS.add("computer_systems");
-        SKILL_IDS.add("construction");
-        SKILL_IDS.add("mechanical_engineering");
-        SKILL_IDS.add("field_repairs");
-        SKILL_IDS.add("navigation");
-
-        /*String id;
-         Global.getLogger(RespecPlugin.class).log(Level.DEBUG,
-         "Loading aptitudes...");
-         JSONArray aptitudeData = Global.getSettings()
-         .getMergedSpreadhsheetDataForMod("id",
-         "data/characters/skills/aptitude_data.csv", "lw_respec");
-         for (int x = 0; x < aptitudeData.length(); x++)
-         {
-         id = aptitudeData.getJSONObject(x).getString("id");
-         Global.getLogger(RespecPlugin.class).log(Level.DEBUG,
-         "Found aptitude \"" + id + "\"");
-         APTITUDE_IDS.add(id);
-         }
-
-         Global.getLogger(RespecPlugin.class).log(Level.DEBUG,
-         "Aptitudes loaded.");
-         Global.getLogger(RespecPlugin.class).log(Level.DEBUG,
-         "Loading skills...");
-
-         JSONArray skillData = Global.getSettings()
-         .getMergedSpreadhsheetDataForMod("id",
-         "data/characters/skills/skill_data.csv", "lw_respec");
-         for (int x = 0; x < skillData.length(); x++)
-         {
-         id = skillData.getJSONObject(x).getString("id");
-         Global.getLogger(RespecPlugin.class).log(Level.DEBUG,
-         "Found skill \"" + id + "\"");
-         SKILL_IDS.add(id);
-         }
-
-         Global.getLogger(RespecPlugin.class).log(Level.DEBUG,
-         "Loaded skills.");*/
-    }
-
-    @Override
-    public void onEnabled(boolean wasEnabledBefore)
-    {
-        Map data = Global.getSector().getPersistentData();
-        if (!data.containsKey(RESPEC_ENABLED_FLAG))
-        {
-            data.put(RESPEC_ENABLED_FLAG, true);
-            Global.getSector().addScript(this);
-            doChecks();
-        }
-    }
-
     public static void main(String[] args)
     {
-        data.scripts.plugins.LevelupPluginImpl tmp =
-                new data.scripts.plugins.LevelupPluginImpl();
+        data.scripts.plugins.LevelupPluginImpl tmp
+                = new data.scripts.plugins.LevelupPluginImpl();
         String icon;
         float progress;
 
