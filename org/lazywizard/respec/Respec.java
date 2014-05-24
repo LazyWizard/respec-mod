@@ -2,6 +2,7 @@ package org.lazywizard.respec;
 
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CargoAPI;
+import com.fs.starfarer.api.campaign.CargoAPI.CargoItemType;
 import com.fs.starfarer.api.campaign.CargoStackAPI;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.campaign.StarSystemAPI;
@@ -24,17 +25,15 @@ class Respec
 
     static void loadCSVData() throws JSONException, IOException
     {
-        String id;
-        int total;
+        int numAptitudes = 0, numSkills = 0;
 
-        Global.getLogger(Respec.class).log(Level.INFO,
+        Global.getLogger(Respec.class).log(Level.DEBUG,
                 "Loading aptitudes...");
         JSONArray aptitudeData = Global.getSettings()
                 .loadCSV("data/characters/skills/aptitude_data.csv");
-        total = 0;
         for (int x = 0; x < aptitudeData.length(); x++)
         {
-            id = aptitudeData.getJSONObject(x).getString("id");
+            String id = aptitudeData.getJSONObject(x).getString("id");
             if (id.isEmpty())
             {
                 Global.getLogger(Respec.class).log(Level.DEBUG,
@@ -45,20 +44,17 @@ class Respec
                 Global.getLogger(Respec.class).log(Level.DEBUG,
                         "Found aptitude \"" + id + "\"");
                 APTITUDE_IDS.add(id);
-                total++;
+                numAptitudes++;
             }
         }
-        Global.getLogger(Respec.class).log(Level.INFO,
-                "Loaded " + total + " aptitudes.");
 
-        Global.getLogger(Respec.class).log(Level.INFO,
+        Global.getLogger(Respec.class).log(Level.DEBUG,
                 "Loading skills...");
         JSONArray skillData = Global.getSettings()
                 .loadCSV("data/characters/skills/skill_data.csv");
-        total = 0;
         for (int x = 0; x < skillData.length(); x++)
         {
-            id = skillData.getJSONObject(x).getString("id");
+            String id = skillData.getJSONObject(x).getString("id");
             if (id.isEmpty())
             {
                 Global.getLogger(Respec.class).log(Level.DEBUG,
@@ -69,11 +65,12 @@ class Respec
                 Global.getLogger(Respec.class).log(Level.DEBUG,
                         "Found skill \"" + id + "\"");
                 SKILL_IDS.add(id);
-                total++;
+                numSkills++;
             }
         }
+
         Global.getLogger(Respec.class).log(Level.INFO,
-                "Loaded " + total + " skills.");
+                "Loaded " + numAptitudes + " aptitudes and " + numSkills + " skills.");
     }
 
     private static int getLevel()
@@ -164,7 +161,8 @@ class Respec
             for (SectorEntityToken station : system.getOrbitalStations())
             {
                 // Remove all existing respec items
-                for (CargoStackAPI stack : station.getCargo().getStacksCopy())
+                CargoAPI cargo = station.getCargo();
+                for (CargoStackAPI stack : cargo.getStacksCopy())
                 {
                     if (stack.isNull() || !stack.isResourceStack())
                     {
@@ -177,18 +175,18 @@ class Respec
                         Global.getLogger(Respec.class).log(Level.DEBUG,
                                 "Removing " + stack.getSize() + " items from "
                                 + station.getFullName() + ".");
-                        station.getCargo().removeItems(stack.getType(),
+                        cargo.removeItems(stack.getType(),
                                 stack.getData(), stack.getSize());
                     }
                 }
 
                 // Add the proper item for the player's level (no free respecs)
-                if (addRespec && !station.getCargo().isFreeTransfer()
+                if (addRespec && !station.isFreeTransfer()
                         && !station.getFaction().isNeutralFaction())
                 {
                     Global.getLogger(Respec.class).log(Level.DEBUG,
                             "Adding item to " + station.getFullName() + ".");
-                    station.getCargo().addItems(CargoAPI.CargoItemType.RESOURCES, respecPackage, 1f);
+                    cargo.addItems(CargoItemType.RESOURCES, respecPackage, 1f);
                 }
             }
         }

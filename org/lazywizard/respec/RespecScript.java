@@ -2,7 +2,6 @@ package org.lazywizard.respec;
 
 import com.fs.starfarer.api.EveryFrameScript;
 import com.fs.starfarer.api.Global;
-import com.fs.starfarer.api.campaign.CampaignClockAPI;
 
 public class RespecScript implements EveryFrameScript
 {
@@ -18,8 +17,7 @@ public class RespecScript implements EveryFrameScript
     @Override
     public void advance(float amount)
     {
-        CampaignClockAPI clock = Global.getSector().getClock();
-        if (clock.getHour() != lastCheck)
+        if (Global.getSector().getClock().getHour() != lastCheck)
         {
             doChecks();
         }
