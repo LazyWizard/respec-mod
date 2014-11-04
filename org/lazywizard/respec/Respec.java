@@ -1,5 +1,9 @@
 package org.lazywizard.respec;
 
+import java.awt.Color;
+import java.io.IOException;
+import java.util.HashSet;
+import java.util.Set;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CargoAPI;
 import com.fs.starfarer.api.campaign.CargoAPI.CargoItemType;
@@ -7,10 +11,6 @@ import com.fs.starfarer.api.campaign.CargoStackAPI;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.campaign.StarSystemAPI;
 import com.fs.starfarer.api.characters.MutableCharacterStatsAPI;
-import java.awt.Color;
-import java.io.IOException;
-import java.util.HashSet;
-import java.util.Set;
 import org.apache.log4j.Level;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -21,8 +21,8 @@ class Respec
     private static final String RESPEC_ITEM_PREFIX = "respec_";
     private static final float RESPEC_ITEM_COST_PER_XP = .2f;
     private static final int MAX_LEVEL_SUPPORTED = 60;
-    private static final Set<String> APTITUDE_IDS = new HashSet<String>();
-    private static final Set<String> SKILL_IDS = new HashSet<String>();
+    private static final Set<String> APTITUDE_IDS = new HashSet<>();
+    private static final Set<String> SKILL_IDS = new HashSet<>();
 
     private static String filterModPath(String fullPath)
     {
@@ -41,17 +41,15 @@ class Respec
         }
     }
 
-    static void reloadCSVData() throws JSONException, IOException
+    public static void reloadCSVData() throws JSONException, IOException
     {
         APTITUDE_IDS.clear();
         SKILL_IDS.clear();
 
         Global.getLogger(Respec.class).log(Level.DEBUG,
                 "Loading aptitudes...");
-        JSONArray aptitudeData = Global.getSettings()
-                .loadCSV("data/characters/skills/aptitude_data.csv");
-        /*JSONArray aptitudeData = Global.getSettings().getMergedSpreadsheetDataForMod(
-                "id", "data/characters/skills/aptitude_data.csv", "starsector-core");*/
+        JSONArray aptitudeData = Global.getSettings().getMergedSpreadsheetDataForMod(
+                "id", "data/characters/skills/aptitude_data.csv", "starsector-core");
         for (int x = 0; x < aptitudeData.length(); x++)
         {
             JSONObject tmp = aptitudeData.getJSONObject(x);
@@ -72,10 +70,8 @@ class Respec
 
         Global.getLogger(Respec.class).log(Level.DEBUG,
                 "Loading skills...");
-        JSONArray skillData = Global.getSettings()
-                .loadCSV("data/characters/skills/skill_data.csv");
-        /*JSONArray skillData = Global.getSettings().getMergedSpreadsheetDataForMod(
-                "id", "data/characters/skills/skill_data.csv", "starsector-core");*/
+        JSONArray skillData = Global.getSettings().getMergedSpreadsheetDataForMod(
+                "id", "data/characters/skills/skill_data.csv", "starsector-core");
         for (int x = 0; x < skillData.length(); x++)
         {
             JSONObject tmp = skillData.getJSONObject(x);
@@ -105,7 +101,7 @@ class Respec
         return Math.max(1, Math.min(MAX_LEVEL_SUPPORTED, player.getLevel()));
     }
 
-    private static void respecPlayer()
+    static void respecPlayer()
     {
         int tmp;
         MutableCharacterStatsAPI player = Global.getSector().getPlayerFleet().getCommanderStats();
@@ -178,6 +174,13 @@ class Respec
 
     static void updateInventories(boolean addRespec)
     {
+        // Broken with new market update
+        // TODO: Reimplement in .65a
+        if (true)
+        {
+            return;
+        }
+
         Global.getLogger(Respec.class).log(Level.DEBUG,
                 "Checking station inventories...");
 
@@ -228,6 +231,9 @@ class Respec
         String icon;
         float progress;
 
+        // TODO: Update to use commodities.csv
+        //"name,id,demand class,base price,price variability,utility,decay,origin,tags,stack size,cargo space,icon,sound id,sound id drop,order"
+        //"Supplies,supplies,supplies,100,7,1,0.1,,military,1000,1,graphics/icons/cargo/supplies.png,ui_cargo_supplies,ui_cargo_supplies_drop,0.5"
         // data/campaign/resources.csv
         System.out.println("name,id,cargo space,base value,stack size,icon,order");
         for (int x = 1; x <= MAX_LEVEL_SUPPORTED; x++)
